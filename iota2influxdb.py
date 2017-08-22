@@ -75,7 +75,6 @@ def getNeighbors(uris):
 
 		print("SUCCES")
 		if skip == False:
-			pp.pprint(neighbors)
 			for neighbor in neighbors['neighbors']:
 				fields = {
 					'numberOfAllTransactions': neighbor['numberOfAllTransactions'],
