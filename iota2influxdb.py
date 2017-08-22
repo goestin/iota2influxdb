@@ -61,6 +61,38 @@ def getNodeInfo(uris):
 			json_data.append(createInfluxMeasurement("node_info", fields=fields, tags=tags))
 	return(json_data)
 
+def getNeighbors(uris):
+	json_data = []
+	for uri in uris:
+		api=StrictIota(uri)
+		try:
+			print('>>> Requesting getNeighbors from: \"%s\": ' % uri),
+			neighbors=api.get_neighbors()
+			skip=False
+		except Exception,error:
+			print("ERROR: %s" % error)
+			skip=True
+
+		print("SUCCES")
+		if skip == False:
+			pp.pprint(neighbors)
+			for neighbor in neighbors['neighbors']:
+				fields = {
+					'numberOfAllTransactions': neighbor['numberOfAllTransactions'],
+					'numberOfInvalidTransactions': neighbor['numberOfInvalidTransactions'],
+					'numberOfNewTransactions': neighbor['numberOfNewTransactions'],
+					'numberOfRandomTransactionRequests': neighbor['numberOfRandomTransactionRequests'],
+					'numberOfSentTransactions': neighbor['numberOfSentTransactions']
+				}
+
+				tags = {
+					'source': uri.split('//')[1].split(':')[0],
+					'address': neighbor['address'],
+					'connectionType': neighbor['connectionType']
+				}
+				json_data.append(createInfluxMeasurement("neighbors", fields=fields, tags=tags))
+	return(json_data)
+
 def createInfluxMeasurement(name, fields={}, tags={}):
 	json_body = {
 			"measurement": name,
@@ -75,6 +107,10 @@ def writeInfluxMeasurement(measurement):
 	
 while True:
 	measurement = getNodeInfo(args.uri)
+#	pp.pprint(measurement)
+	writeInfluxMeasurement(measurement)
+	measurement = getNeighbors(args.uri)
+#	pp.pprint(measurement)
 	writeInfluxMeasurement(measurement)
 	print('III sleeping for 10 seconds...')
 	time.sleep(10)
