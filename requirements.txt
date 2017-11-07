@@ -1,3 +1,3 @@
-pyota==1.1.3
+pyota==2.0.1
 influxdb==4.1.1
 
